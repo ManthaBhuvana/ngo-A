@@ -15,6 +15,7 @@
     "@react-three/fiber": "^8.18.0",
     "@studio-freight/lenis": "^1.0.42",
     "@studio-freight/react-lenis": "^0.0.47",
+    "@supabase/supabase-js": "^2.111.0",
     "@tabler/icons-react": "^3.34.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.5",
