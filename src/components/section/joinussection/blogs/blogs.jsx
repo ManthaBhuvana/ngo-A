@@ -1,5 +1,5 @@
 import React from "react";
-import PaymentPage from "@/app/paymentpage/payment";
+import PaymentPage from "@/app/payment/page";
 
 export default function BlogsComingSoon() {
   return (
