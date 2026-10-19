@@ -1,3 +1,16 @@
+## Recent Changes
+
+- **Gallery:** Updated the gallery to display images in a continuous right-to-left scrolling carousel, removed navigation arrows, and added an enlarged image lightbox with close-button and Escape-key support.
+- **About Us:** Added interactive team member cards with selection highlighting, a pink glow, and zoom animation. The page-jump issue on clicking a member is still being investigated.
+- **Footer:** Updated the footer component and worked on changing the copyright year to 2026 and linking the Support A Cause button to the payment page.
+- **Navigation:** Modified the desktop and mobile navbar behavior so the main menu labels are non-clickable while submenu items remain navigable.
+- **Contact Us:** Updated the navbar to make Contact Us clickable and direct it to the `/contactus` route.
+- **Navbar:** Updated desktop and mobile navigation so the main menu labels remain non-clickable while submenu items navigate to their respective pages. Made Contact Us clickable to open the `/contactus` route.
+- **Page Transitions:** Optimized transition response time to make page navigation faster.
+
+
+
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
