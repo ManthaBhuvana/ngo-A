@@ -1,311 +1,302 @@
 "use client";
+
 import { cn } from "@/lib/utils";
-import React, { useRef, useState, useEffect } from "react";
-import {
-  motion,
-  useMotionValue,
-  useSpring,
-  useTransform,
-  animate,
-  useVelocity,
-  useAnimationControls,
-} from "framer-motion"; // <-- FIX: use 'framer-motion' instead of 'motion/react'
+import React, { useEffect, useState, useCallback, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
-export const DraggableCardBody = ({ className, children, style }) => {
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const cardRef = useRef(null);
-  const controls = useAnimationControls();
-  const [constraints, setConstraints] = useState({
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  });
+const ITEMS = [
+  {
+    title: "Literacy",
+    image: "/gallery/literacy.webp",
+    style: { top: "12%", left: "10%", rotate: "-18deg", zIndex: 10 },
+  },
+  {
+    title: "Beat the Heat",
+    image: "/gallery/heat.webp",
+    style: { top: "18%", right: "12%", rotate: "14deg", zIndex: 9 },
+  },
+  {
+    title: "Naya Sawera NGO",
+    image: "/gallery/3.webp",
+    style: { bottom: "18%", left: "8%", rotate: "-8deg", zIndex: 8 },
+  },
+  {
+    title: "Sarthak Oldage Home",
+    image: "/gallery/4.webp",
+    style: { bottom: "10%", right: "8%", rotate: "22deg", zIndex: 7 },
+  },
+  {
+    title: "Winter Drive",
+    image: "/gallery/winterdrive.webp",
+    style: { top: "28%", left: "22%", rotate: "-7deg", zIndex: 6 },
+  },
+  {
+    title: "Medikit Drive",
+    image: "/gallery/medikitdrive.webp",
+    style: { top: "32%", right: "20%", rotate: "10deg", zIndex: 5 },
+  },
+  {
+    title: "Food Donation Drive",
+    image: "/gallery/7.webp",
+    style: { bottom: "22%", left: "25%", rotate: "-15deg", zIndex: 4 },
+  },
+  {
+    title: "Republic Day Celebrations",
+    image: "/gallery/republicday.webp",
+    style: { bottom: "25%", right: "25%", rotate: "16deg", zIndex: 3 },
+  },
+];
 
-  const velocityX = useVelocity(mouseX);
-  const velocityY = useVelocity(mouseY);
+export function DraggableCardContainer({ className, children }) {
+  return (
+    <div className={cn("[perspective:2000px]", className)}>
+      {children}
+    </div>
+  );
+}
 
-  const springConfig = {
-    stiffness: 100,
-    damping: 20,
-    mass: 0.5,
+export function DraggableCardBody({
+  item,
+  index,
+  onOpen,
+  constraints,
+}) {
+  const pointerStart = useRef(null);
+  const [dragged, setDragged] = useState(false);
+
+  const handlePointerDown = (event) => {
+    pointerStart.current = {
+      x: event.clientX,
+      y: event.clientY,
+    };
+    setDragged(false);
   };
 
-  const rotateX = useSpring(
-    useTransform(mouseY, [-300, 300], [25, -25]),
-    springConfig
-  );
-  const rotateY = useSpring(
-    useTransform(mouseX, [-300, 300], [-25, 25]),
-    springConfig
-  );
+  const handlePointerMove = (event) => {
+    if (!pointerStart.current) return;
 
-  const opacity = useSpring(
-    useTransform(mouseX, [-300, 0, 300], [0.8, 1, 0.8]),
-    springConfig
-  );
+    const dx = event.clientX - pointerStart.current.x;
+    const dy = event.clientY - pointerStart.current.y;
 
-  const glareOpacity = useSpring(
-    useTransform(mouseX, [-300, 0, 300], [0.2, 0, 0.2]),
-    springConfig
-  );
-
-  useEffect(() => {
-    const updateConstraints = () => {
-      if (typeof window !== "undefined") {
-        setConstraints({
-          top: -window.innerHeight / 2,
-          left: -window.innerWidth / 2,
-          right: window.innerWidth / 2,
-          bottom: window.innerHeight / 2,
-        });
-      }
-    };
-
-    updateConstraints();
-
-    window.addEventListener("resize", updateConstraints);
-
-    return () => {
-      window.removeEventListener("resize", updateConstraints);
-    };
-  }, []);
-
-  const handleMouseMove = (e) => {
-    const { clientX, clientY } = e;
-    const { width, height, left, top } =
-      cardRef.current?.getBoundingClientRect() ?? {
-        width: 0,
-        height: 0,
-        left: 0,
-        top: 0,
-      };
-    const centerX = left + width / 2;
-    const centerY = top + height / 2;
-    const deltaX = clientX - centerX;
-    const deltaY = clientY - centerY;
-    mouseX.set(deltaX);
-    mouseY.set(deltaY);
+    if (Math.sqrt(dx * dx + dy * dy) > 8) {
+      setDragged(true);
+    }
   };
 
-  const handleMouseLeave = () => {
-    mouseX.set(0);
-    mouseY.set(0);
+  const handleClick = (event) => {
+    if (dragged) {
+      event.preventDefault();
+      event.stopPropagation();
+      setDragged(false);
+      return;
+    }
+
+    onOpen(index);
   };
 
   return (
-    <motion.div
-      ref={cardRef}
+    <motion.button
+      type="button"
       drag
       dragConstraints={constraints}
+      dragElastic={0.12}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={() => {
+        // Allow the click event to run after pointer-up.
+        window.setTimeout(() => {
+          pointerStart.current = null;
+        }, 0);
+      }}
+      onClick={handleClick}
       onDragStart={() => {
+        setDragged(true);
         document.body.style.cursor = "grabbing";
       }}
-      onDragEnd={(event, info) => {
-        document.body.style.cursor = "default";
-
-        controls.start({
-          rotateX: 0,
-          rotateY: 0,
-          transition: {
-            type: "spring",
-            ...springConfig,
-          },
-        });
-        const currentVelocityX = velocityX.get();
-        const currentVelocityY = velocityY.get();
-
-        const velocityMagnitude = Math.sqrt(
-          currentVelocityX * currentVelocityX +
-            currentVelocityY * currentVelocityY
-        );
-        const bounce = Math.min(0.8, velocityMagnitude / 1000);
-
-        animate(info.point.x, info.point.x + currentVelocityX * 0.3, {
-          duration: 0.8,
-          ease: [0.2, 0, 0, 1],
-          bounce,
-          type: "spring",
-          stiffness: 50,
-          damping: 15,
-          mass: 0.8,
-        });
-
-        animate(info.point.y, info.point.y + currentVelocityY * 0.3, {
-          duration: 0.8,
-          ease: [0.2, 0, 0, 1],
-          bounce,
-          type: "spring",
-          stiffness: 50,
-          damping: 15,
-          mass: 0.8,
-        });
+      onDragEnd={() => {
+        document.body.style.cursor = "";
+        window.setTimeout(() => setDragged(false), 100);
       }}
+      whileHover={{
+        scale: 1.08,
+        zIndex: 50,
+        filter: "brightness(1.08)",
+        boxShadow: "0 20px 55px rgba(236,72,153,0.4)",
+      }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ type: "spring", stiffness: 260, damping: 20 }}
       style={{
-        rotateX,
-        rotateY,
-        opacity,
-        willChange: "transform",
-        ...style,
+        ...item.style,
+        touchAction: "none",
       }}
-      animate={controls}
-      whileHover={{ scale: 1.02 }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
       className={cn(
-        "relative min-h-60 w-48 overflow-hidden rounded-md bg-neutral-100 p-4 shadow-2xl transform-3d dark:bg-neutral-900",
-        className
+        "absolute flex min-h-60 w-48 cursor-pointer flex-col items-center overflow-hidden rounded-md bg-neutral-100 p-4 text-left shadow-2xl dark:bg-neutral-900",
+        index === 0 && "md:top-[16%] md:left-[18%] md:[rotate:-14deg]"
       )}
+      aria-label={`Enlarge photo: ${item.title}`}
     >
-      {children}
-      <motion.div
-        style={{
-          opacity: glareOpacity,
-        }}
-        className="absolute inset-0 bg-white pointer-events-none select-none"
+      <img
+        src={item.image}
+        alt={item.title}
+        draggable={false}
+        className="pointer-events-none relative z-10 h-36 w-36 select-none object-cover md:h-52"
       />
-    </motion.div>
-  );
-};
 
-export const DraggableCardContainer = ({ className, children }) => {
-  return (
-    <div className={cn("[perspective:3000px]", className)}>{children}</div>
+      <span className="pointer-events-none mt-2 text-center text-base font-bold text-neutral-700 dark:text-neutral-300 md:text-lg">
+        {item.title}
+      </span>
+    </motion.button>
   );
-};
+}
 
 export function Gallery() {
-  const items = [
-    {
-      title: "Literacy",
-      image: "/gallery/literacy.webp",
-      className: "absolute",
-      style: {
-        top: "12%",
-        left: "10%",
-        rotate: "-18deg",
-        zIndex: 10,
-      },
-    },
-    {
-      title: "Beat the Heat",
-      image: "/gallery/heat.webp",
-      className: "absolute",
-      style: {
-        top: "18%",
-        right: "12%",
-        rotate: "14deg",
-        zIndex: 9,
-      },
-    },
-    {
-      title: "Naya Sawera NGO",
-      image: "/gallery/3.webp",
-      className: "absolute",
-      style: {
-        bottom: "18%",
-        left: "8%",
-        rotate: "-8deg",
-        zIndex: 8,
-      },
-    },
-    {
-      title: "Sarthak Oldage Home",
-      image: "/gallery/4.webp",
-      className: "absolute",
-      style: {
-        bottom: "10%",
-        right: "8%",
-        rotate: "22deg",
-        zIndex: 7,
-      },
-    },
-    {
-      title: "Winter Drive",
-      image: "/gallery/winterdrive.webp",
-      className: "absolute",
-      style: {
-        top: "28%",
-        left: "22%",
-        rotate: "-7deg",
-        zIndex: 6,
-      },
-    },
-    {
-      title: "Medikit Drive",
-      image: "/gallery/medikitdrive.webp",
-      className: "absolute",
-      style: {
-        top: "32%",
-        right: "20%",
-        rotate: "10deg",
-        zIndex: 5,
-      },
-    },
-    {
-      title: "Food Donation Drive",
-      image: "/gallery/7.webp",
-      className: "absolute",
-      style: {
-        bottom: "22%",
-        left: "25%",
-        rotate: "-15deg",
-        zIndex: 4,
-      },
-    },
-    {
-      title: "Republic Day Celebrations",
-      image: "/gallery/republicday.webp",
-      className: "absolute",
-      style: {
-        bottom: "25%",
-        right: "25%",
-        rotate: "16deg",
-        zIndex: 3,
-      },
-    },
-  ];
+  const [selectedIndex, setSelectedIndex] = useState(null);
+  const [hoveredIndex, setHoveredIndex] = useState(null);
+  const constraintsRef = useRef(null);
 
-  function getCardStyle(item, idx) {
-    // Remove any unsupported @media keys from the style object
-    const baseStyle = { ...item.style };
-    // If idx === 0, apply responsive overrides using a CSS class instead of inline style
-    if (idx === 0) {
-      // Remove any @media keys if present
-      Object.keys(baseStyle).forEach((key) => {
-        if (key.startsWith("@media")) {
-          delete baseStyle[key];
-        }
-      });
-    }
-    return baseStyle;
-  }
+  const selectedItem =
+    selectedIndex === null ? null : ITEMS[selectedIndex];
+
+  const closeViewer = useCallback(() => {
+    setSelectedIndex(null);
+  }, []);
+
+  const showPrevious = useCallback(() => {
+    setSelectedIndex((current) =>
+      current === null
+        ? 0
+        : (current - 1 + ITEMS.length) % ITEMS.length
+    );
+  }, []);
+
+  const showNext = useCallback(() => {
+    setSelectedIndex((current) =>
+      current === null ? 0 : (current + 1) % ITEMS.length
+    );
+  }, []);
+
+  useEffect(() => {
+    if (selectedIndex === null) return;
+
+    const oldOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") closeViewer();
+      if (event.key === "ArrowLeft") showPrevious();
+      if (event.key === "ArrowRight") showNext();
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = oldOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [selectedIndex, closeViewer, showPrevious, showNext]);
 
   return (
-    <DraggableCardContainer className="overflow-clip relative flex items-center justify-center min-h-screen w-full">
-      <p className="absolute top-1/2 mx-auto max-w-sm text-center text-4xl font-black text-pink-500 pointer-events-none select-none -translate-y-3/4 dark:text-pink-400 md:text-6xl lg:text-8xl">
-        GALLERY
-      </p>
-      {items.map((item, idx) => (
-        <DraggableCardBody
-          className={cn(
-            item.className,
-            idx === 0 && "md:top-[16%] left-[18%] md:[rotate:-14deg]"
-          )}
-          style={getCardStyle(item, idx)}
-          key={item.title + idx}
-        >
-          <img
-            src={item.image}
-            alt={item.title}
-            className="z-10 object-cover relative h-36 w-36 pointer-events-none md:h-52"
-          />
-          <h3 className="mt-2 text-center text-base font-bold text-neutral-700 dark:text-neutral-300 md:text-lg">
-            {item.title}
-          </h3>
-        </DraggableCardBody>
-      ))}
-    </DraggableCardContainer>
+    <>
+      <DraggableCardContainer
+        className="relative flex min-h-screen w-full items-center justify-center overflow-clip bg-black"
+      >
+        <div ref={constraintsRef} className="pointer-events-none absolute inset-0" />
+
+        <p className="pointer-events-none absolute top-1/2 z-0 mx-auto max-w-sm -translate-y-3/4 select-none text-center text-4xl font-black text-pink-500 md:text-6xl lg:text-8xl">
+          GALLERY
+        </p>
+
+        {ITEMS.map((item, index) => (
+          <div
+            key={item.title}
+            className="contents"
+            onMouseEnter={() => setHoveredIndex(index)}
+            onMouseLeave={() => setHoveredIndex(null)}
+          >
+            <DraggableCardBody
+              item={item}
+              index={index}
+              onOpen={setSelectedIndex}
+              constraints={constraintsRef}
+            />
+          </div>
+        ))}
+      </DraggableCardContainer>
+
+      <AnimatePresence>
+        {selectedItem && (
+          <motion.div
+            className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm sm:p-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={closeViewer}
+            role="dialog"
+            aria-modal="true"
+            aria-label={selectedItem.title}
+          >
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                closeViewer();
+              }}
+              className="absolute right-5 top-5 z-30 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-white text-3xl text-black shadow-lg hover:bg-pink-100"
+              aria-label="Close gallery"
+            >
+              &times;
+            </button>
+
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                showPrevious();
+              }}
+              className="absolute left-3 top-1/2 z-30 flex h-12 w-12 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white/90 text-4xl text-black shadow-lg transition hover:scale-110 hover:bg-pink-400 sm:left-8 sm:h-14 sm:w-14"
+              aria-label="Previous photo"
+            >
+              ‹
+            </button>
+
+            <motion.div
+              key={selectedItem.image}
+              className="flex max-h-[90vh] max-w-5xl flex-col items-center"
+              initial={{ scale: 0.85, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 260, damping: 24 }}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <img
+                src={selectedItem.image}
+                alt={selectedItem.title}
+                className="max-h-[78vh] max-w-[72vw] rounded-xl object-contain shadow-2xl"
+              />
+
+              <h2 className="mt-4 text-center text-xl font-bold text-white sm:text-2xl">
+                {selectedItem.title}
+              </h2>
+
+              <p className="mt-1 text-sm text-white/70">
+                {selectedIndex + 1} / {ITEMS.length}
+              </p>
+            </motion.div>
+
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                showNext();
+              }}
+              className="absolute right-3 top-1/2 z-30 flex h-12 w-12 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white/90 text-4xl text-black shadow-lg transition hover:scale-110 hover:bg-pink-400 sm:right-8 sm:h-14 sm:w-14"
+              aria-label="Next photo"
+            >
+              ›
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

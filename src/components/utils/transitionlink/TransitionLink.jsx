@@ -1,244 +1,243 @@
 "use client";
+
 import Link from "next/link";
-import React, { useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { useLenis } from "@studio-freight/react-lenis";
-import { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
-// ---- TRANSITION DURATION CONTROL ----
-// To change the transition duration, edit this value (in milliseconds):
-const TRANSITION_DURATION_MS = 1500; // 700ms = 0.7s. Change this to your desired duration (e.g., 1000 for 1s)
+const COVER_DURATION = 500;
+const OPEN_DURATION = 650;
 
-// Utility to escape double and single quotes for HTML attributes/text
-function escapeHtml(str) {
-  if (typeof str !== "string") return str;
-  return str.replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+function removeOverlay() {
+  document.getElementById("avasa-page-transition")?.remove();
 }
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function addSlideRightOverlay() {
-  if (typeof document === "undefined") return;
-  const old = document.getElementById("page-transition-slide-right");
-  if (old) old.remove();
+function createOverlay() {
+  removeOverlay();
 
   const overlay = document.createElement("div");
-  overlay.id = "page-transition-slide-right";
-  overlay.className = "page-transition-slide-right";
-  overlay.style.background = "#fff";
-  overlay.style.animationDuration = `${TRANSITION_DURATION_MS / 1000}s`;
-  overlay.style.animationTimingFunction = "cubic-bezier(0.77, 0, 0.175, 1)";
-  overlay.style.display = "flex";
-  overlay.style.alignItems = "center";
-  overlay.style.justifyContent = "center";
-  overlay.style.overflow = "hidden";
-  overlay.style.position = "fixed";
-  overlay.style.inset = "0";
-  overlay.style.zIndex = "9999";
+  overlay.id = "avasa-page-transition";
 
-  // SVG for a curved right edge (vertical curve)
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("width", "18vw");
-  svg.setAttribute("height", "100%");
-  svg.setAttribute("viewBox", "0 0 18 100");
-  svg.setAttribute("preserveAspectRatio", "none");
-  svg.style.position = "absolute";
-  svg.style.right = "0";
-  svg.style.top = "0";
-  svg.style.width = "18vw";
-  svg.style.height = "100%";
-  svg.style.pointerEvents = "none";
-  svg.style.zIndex = "10001";
+  Object.assign(overlay.style, {
+    position: "fixed",
+    inset: "0",
+    zIndex: "99999",
+    background: "#fff",
+    overflow: "hidden",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    pointerEvents: "none",
+    transform: "translateX(100%)",
+    willChange: "transform",
+  });
 
-  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  // This path creates a curve on the right edge
-  path.setAttribute("d", "M18,0 Q0,50 18,100 L18,100 L18,0 Z");
+  // Curved edge on the right side of the white page.
+  const edge = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "svg"
+  );
+
+  edge.setAttribute("viewBox", "0 0 100 100");
+  edge.setAttribute("preserveAspectRatio", "none");
+
+  Object.assign(edge.style, {
+    position: "absolute",
+    right: "-1px",
+    top: "0",
+    width: "12vw",
+    minWidth: "50px",
+    height: "100%",
+  });
+
+  const path = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "path"
+  );
+
+  path.setAttribute("d", "M100 0 C15 25 15 75 100 100 L100 0 Z");
   path.setAttribute("fill", "#fff");
-  svg.appendChild(path);
+  edge.appendChild(path);
+  overlay.appendChild(edge);
 
-  overlay.appendChild(svg);
+  const logo = document.createElement("img");
+  logo.src = "/svg/AVASA.svg";
+  logo.alt = "AVASA Foundation";
 
-  const img = document.createElement("img");
-  img.src = "/svg/AVASA.svg";
-  img.alt = "Page Transition Symbol";
-  img.style.width = "80px";
-  img.style.height = "80px";
-  img.style.objectFit = "contain";
-  img.style.display = "block";
-  img.style.zIndex = "10002";
-  overlay.appendChild(img);
+  Object.assign(logo.style, {
+    position: "absolute",
+    width: "clamp(90px, 12vw, 150px)",
+    height: "auto",
+    objectFit: "contain",
+    left: "50%",
+    top: "50%",
+    transform: "translate(-50%, -50%)",
+    opacity: "0",
+    filter: "drop-shadow(0 8px 18px rgba(0,0,0,0.08))",
+  });
 
+  overlay.appendChild(logo);
   document.body.appendChild(overlay);
-}
 
-function removeSlideRightOverlay() {
-  if (typeof document === "undefined") return;
-  const overlay = document.getElementById("page-transition-slide-right");
-  if (overlay) overlay.remove();
-}
-
-function ensureTransitionStyle() {
-  if (typeof window === "undefined" || typeof document === "undefined") return;
-  if (!document.getElementById("page-transition-slide-right-style")) {
-    const style = document.createElement("style");
-    style.id = "page-transition-slide-right-style";
-    style.innerHTML = `
-      .page-transition-slide-right {
-        pointer-events: none;
-        position: fixed;
-        inset: 0;
-        z-index: 9999;
-        background: #fff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        animation: slideInFromRightCurved ${
-          TRANSITION_DURATION_MS / 1000
-        }s cubic-bezier(0.77, 0, 0.175, 1) forwards;
-        overflow: hidden;
-      }
-      .page-transition-slide-right img {
-        width: 80px;
-        height: 80px;
-        object-fit: contain;
-        display: block;
-        z-index: 10002;
-      }
-      .page-transition-slide-right svg {
-        position: absolute;
-        right: 0;
-        top: 0;
-        width: 18vw;
-        height: 100%;
-        z-index: 10001;
-        pointer-events: none;
-        display: block;
-      }
-      @keyframes slideInFromRightCurved {
-        0% {
-          transform: translateX(100%);
-          opacity: 1;
-        }
-        100% {
-          transform: translateX(0%);
-          opacity: 1;
-        }
-      }
-    `;
-    document.head.appendChild(style);
-  }
+  return { overlay, logo };
 }
 
 function getRewrittenHref(href) {
-  // Special-case About Us anchor links: rewrite "/" to the correct anchor if possible
-  // This is to support navLinks dialog links like "aboutus/#who-we-are" etc.
-  // If the href is exactly "aboutus/#who-we-are", "aboutus/#what-we-do", or "aboutus/#meet-our-team", return as is.
-  // If the href is "/" and props['data-aboutus-anchor'] is set, use that.
-  // Otherwise, keep the original logic.
   if (href === "/ourwork") return "/";
   if (href === "/contactus/maplocation") return "/contactus/map";
-  // If the href is one of the About Us anchor links, return as is
-  if (
-    href === "aboutus/#who-we-are" ||
-    href === "aboutus/#what-we-do" ||
-    href === "aboutus/#meet-our-team"
-  ) {
-    return href;
-  }
   return href;
 }
 
-// The main fix: Only set the client-side href after mount, so SSR and client always match
-export const TransitionLink = ({ children, href, ...props }) => {
+export const TransitionLink = ({
+  children,
+  href,
+  onClick,
+  ...props
+}) => {
   const router = useRouter();
-  const lenis = useLenis();
+  const pathname = usePathname();
   const [clientHref, setClientHref] = useState(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
-  // Ensure the style is only injected on the client
-  useEffect(() => {
-    ensureTransitionStyle();
-  }, []);
+  const rewrittenHref = getRewrittenHref(href);
 
-  // Patch: If the href is "/" and a data-aboutus-anchor prop is present, use that as the href
-  let rewrittenHref = getRewrittenHref(href);
-  if (
-    href === "/" &&
-    typeof props["data-aboutus-anchor"] === "string" &&
-    (props["data-aboutus-anchor"] === "aboutus/#who-we-are" ||
-      props["data-aboutus-anchor"] === "aboutus/#what-we-do" ||
-      props["data-aboutus-anchor"] === "aboutus/#meet-our-team")
-  ) {
-    rewrittenHref = props["data-aboutus-anchor"];
-  }
-
-  // On mount, set the clientHref to the rewrittenHref
   useEffect(() => {
     setClientHref(rewrittenHref);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rewrittenHref]);
 
-  // Escape children if it's a string to avoid unescaped quotes
-  let safeChildren = children;
-  if (typeof children === "string") {
-    safeChildren = escapeHtml(children);
-  }
+  useEffect(() => {
+    setIsTransitioning(false);
+    removeOverlay();
+  }, [pathname]);
 
-  // Escape all string props to avoid unescaped quotes in attributes
-  const { ["data-aboutus-anchor"]: _anchor, ...restProps } = props;
-  const safeProps = {};
-  Object.keys(restProps).forEach((key) => {
-    const value = restProps[key];
-    safeProps[key] = typeof value === "string" ? escapeHtml(value) : value;
-  });
+  useEffect(() => {
+    return () => removeOverlay();
+  }, []);
 
   const handleTransition = useCallback(
-    async (e) => {
-      // Use the latest clientHref for navigation
-      const navHref = clientHref ?? rewrittenHref;
+    async (event) => {
+      onClick?.(event);
+
       if (
-        e.defaultPrevented ||
-        e.button !== 0 ||
-        e.metaKey ||
-        e.altKey ||
-        e.ctrlKey ||
-        e.shiftKey ||
-        (typeof navHref === "string" &&
-          (navHref.startsWith("http") || navHref.startsWith("mailto:")))
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
       ) {
         return;
       }
 
-      e.preventDefault();
+      const destination = clientHref ?? rewrittenHref;
 
-      if (lenis) {
-        await lenis.scrollTo(0, {
-          duration: 0.5,
-          easing: (t) => 1 - Math.pow(1 - t, 3),
-        });
-        await sleep(20);
+      if (
+        typeof destination !== "string" ||
+        destination.startsWith("http") ||
+        destination.startsWith("mailto:") ||
+        destination.startsWith("tel:") ||
+        destination.startsWith("#")
+      ) {
+        return;
       }
 
-      addSlideRightOverlay();
+      event.preventDefault();
 
-      // Wait for the transition duration before navigating
-      await sleep(TRANSITION_DURATION_MS - 50); // 50ms less to account for overlay setup
+      if (isTransitioning) return;
 
-      router.push(navHref);
+      const target = new URL(destination, window.location.origin);
+      const current = new URL(window.location.href);
 
-      setTimeout(removeSlideRightOverlay, 500);
+      if (
+        target.pathname === current.pathname &&
+        target.search === current.search &&
+        target.hash === current.hash
+      ) {
+        return;
+      }
+
+      setIsTransitioning(true);
+
+      const { overlay, logo } = createOverlay();
+
+      try {
+        // Stage 1: the branded white page sweeps in.
+        const coverAnimation = overlay.animate(
+          [
+            { transform: "translateX(100%)" },
+            { transform: "translateX(0%)" },
+          ],
+          {
+            duration: COVER_DURATION,
+            easing: "cubic-bezier(0.76, 0, 0.24, 1)",
+            fill: "forwards",
+          }
+        );
+
+        const logoIn = logo.animate(
+          [
+            { opacity: 0, transform: "translate(-50%, -42%) scale(0.82)" },
+            { opacity: 1, transform: "translate(-50%, -50%) scale(1)" },
+          ],
+          {
+            duration: 400,
+            delay: 180,
+            easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+            fill: "forwards",
+          }
+        );
+
+        await coverAnimation.finished;
+
+        // Stage 2: change pages while the screen is covered.
+        router.push(destination);
+
+        // Brief pause lets the destination start rendering underneath.
+        await new Promise((resolve) => setTimeout(resolve, 180));
+
+        // Stage 3: the branded page opens to reveal the destination.
+        const opening = overlay.animate(
+          [
+            { transform: "translateX(0%)" },
+            { transform: "translateX(-105%)" },
+          ],
+          {
+            duration: OPEN_DURATION,
+            easing: "cubic-bezier(0.76, 0, 0.24, 1)",
+            fill: "forwards",
+          }
+        );
+
+        logo.animate(
+          [
+            { opacity: 1, transform: "translate(-50%, -50%) scale(1)" },
+            { opacity: 0, transform: "translate(-50%, -50%) scale(0.92)" },
+          ],
+          {
+            duration: 260,
+            easing: "ease-in",
+            fill: "forwards",
+          }
+        );
+
+        await opening.finished;
+      } catch (error) {
+        console.error("Page transition interrupted:", error);
+      } finally {
+        removeOverlay();
+        setIsTransitioning(false);
+      }
     },
-    [router, clientHref, rewrittenHref, lenis]
+    [clientHref, rewrittenHref, router, onClick, isTransitioning]
   );
 
-  // During SSR, always use the original href to avoid hydration mismatch
-  // After mount, use the rewritten clientHref
-  const linkHref = clientHref === null ? href : clientHref;
-
   return (
-    <Link {...safeProps} href={linkHref} onClick={handleTransition}>
-      {safeChildren}
+    <Link
+      {...props}
+      href={clientHref ?? href}
+      onClick={handleTransition}
+      aria-busy={isTransitioning}
+    >
+      {children}
     </Link>
   );
 };

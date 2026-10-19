@@ -1,4 +1,6 @@
 "use client";
+
+import { useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 
@@ -16,6 +18,8 @@ const fadeIn = {
 };
 
 export default function AboutUsContent() {
+  const [selectedMember, setSelectedMember] = useState(null);
+
   const team = [
     {
       name: "V. Radha Priyanka",
@@ -87,7 +91,10 @@ export default function AboutUsContent() {
         </motion.div>
       </div>
 
-      <div className="grid items-center gap-8 px-4 sm:px-40 lg:grid-cols-2">
+      <div
+        id="who-we-are"
+        className="grid items-center gap-8 px-4 sm:px-40 lg:grid-cols-2 scroll-mt-28"
+      >
         <div>
           <h2 className="mb-6 text-3xl font-semibold text-transparent bg-pink-300 bg-clip-text sm:text-4xl">
             Who We Are
@@ -100,7 +107,6 @@ export default function AboutUsContent() {
               of compassion and change. Rooted in Hyderabad, our journey started
               with simple acts—distributing clothes and food to those in need.
             </p>
-
             <p>
               As our vision expanded, so did our reach. We built a dedicated
               team and extended to Jaipur—taking our mission of care to more
@@ -108,7 +114,6 @@ export default function AboutUsContent() {
               to visits to orphanages and old age homes, every effort is driven
               by the same purpose—to bring hope, dignity, and support.
             </p>
-
             <p>
               Founded in 2022 and officially incorporated as a{" "}
               <strong className="text-[#fb64b6]">
@@ -137,7 +142,10 @@ export default function AboutUsContent() {
         </div>
       </div>
 
-      <div className="relative px-4 py-12 py-20 sm:px-40">
+      <div
+        id="what-we-do"
+        className="relative px-4 py-12 py-20 sm:px-40 scroll-mt-28"
+      >
         <h2 className="mb-10 text-3xl font-semibold text-center text-pink-300 sm:text-4xl lg:text-4xl">
           What We Do
         </h2>
@@ -210,41 +218,84 @@ export default function AboutUsContent() {
         </div>
       </div>
 
-      <h2 className="relative mb-15 text-3xl font-bold text-center text-pink-300 md:text-4xl">
-        Meet Our Board
+      <h2
+        id="meet-our-team"
+        className="relative mb-15 text-3xl font-bold text-center text-pink-300 md:text-4xl scroll-mt-28"
+      >
+        Meet Our Team
       </h2>
+
       <div className="grid grid-cols-1 gap-8 mb-20 mx-auto px-6 max-w-7xl sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {team.map((member, index) => (
-          <div
-            key={index}
-            className="flex flex-col items-center p-6 mb-5 min-h-[350px] text-center bg-neutral-900 rounded-2xl shadow-md md:min-h-[380px] lg:min-h-[200px]"
-          >
-            <div className="overflow-hidden flex items-center justify-center mb-10 mx-auto w-32 h-32 rounded-full">
-              {member.img ? (
-                <Image
-                  src={member.img}
-                  alt={member.name}
-                  width={128}
-                  height={128}
-                  className="object-cover w-full h-full"
-                />
-              ) : (
-                <div className="flex items-center justify-center w-full h-full text-pink-400 text-4xl font-bold bg-neutral-800">
-                  {member.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")
-                    .slice(0, 2)}
-                </div>
+        {team.map((member, index) => {
+          const isSelected = selectedMember === member.name;
+
+          return (
+            <motion.div
+              role="button"
+              tabIndex={0}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                setSelectedMember((current) =>
+                  current === member.name ? null : member.name
+                );
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  e.stopPropagation();
+
+                  setSelectedMember((current) =>
+                    current === member.name ? null : member.name
+                  );
+                }
+              }}
+              whileTap={{ scale: 0.98 }}
+              animate={{
+                scale: isSelected ? 1.035 : 1,
+                borderColor: isSelected ? "#ff69b4" : "rgba(255,255,255,0.06)",
+                boxShadow: isSelected
+                  ? "0 0 28px rgba(255,105,180,0.38)"
+                  : "0 4px 14px rgba(0,0,0,0.22)",
+              }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              className={`flex w-full flex-col items-center rounded-2xl border-2 p-6 mb-5 min-h-[350px] text-center bg-neutral-900 md:min-h-[380px] lg:min-h-[200px] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-400 ${
+                isSelected ? "border-pink-400" : "border-transparent"
+              }`}
+            >
+              <div className="overflow-hidden flex items-center justify-center mb-10 mx-auto w-32 h-32 rounded-full">
+                {member.img ? (
+                  <Image
+                    src={member.img}
+                    alt={member.name}
+                    width={128}
+                    height={128}
+                    className="object-cover w-full h-full"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center w-full h-full text-pink-400 text-4xl font-bold bg-neutral-800">
+                    {member.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .slice(0, 2)}
+                  </div>
+                )}
+              </div>
+              <h3 className="text-xl font-semibold text-white">{member.name}</h3>
+              <p className="mb-2 text-sm font-medium text-pink-400">
+                {member.role}
+              </p>
+              <p className="text-sm text-white">{member.desc}</p>
+              {isSelected && (
+                <span className="mt-4 text-xs font-semibold uppercase tracking-wider text-pink-300">
+                  Selected member
+                </span>
               )}
-            </div>
-            <h3 className="text-xl font-semibold text-white">{member.name}</h3>
-            <p className="mb-2 text-sm font-medium text-pink-400">
-              {member.role}
-            </p>
-            <p className="text-sm text-white">{member.desc}</p>
-          </div>
-        ))}
+            </motion.div>
+          );
+        })}
       </div>
     </div>
   );

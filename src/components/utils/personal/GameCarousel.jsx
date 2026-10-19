@@ -1,197 +1,51 @@
 "use client";
-import React, {
-  useRef,
-  useState,
-  Suspense,
-  lazy,
-  useEffect,
-  useCallback,
-} from "react";
+
+import React, { useState, useEffect, useCallback, Suspense, lazy } from "react";
 import "@/app/globals.css";
 
-// Directly import Swiper and SwiperSlide for correct SSR/client usage
-import { Swiper as SwiperCore, SwiperSlide } from "swiper/react";
-import { EffectCoverflow, Keyboard } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/effect-coverflow";
-
-// Lazy load BackgroundLines as well
 const BackgroundLines = lazy(() =>
   import("@/components/utils/background/background-lines")
 );
 
 const games = [
-  {
-    title: "Care Meal",
-    image: "/main gallery/a.webp",
-    description: "Serving smiles and lunch at Nayasawera NGO, Jaipur.",
-  },
-  {
-    title: "Refreshment Drive",
-    image: "/main gallery/b.webp",
-    description: "Serving smiles and energy through every sip and snack.",
-  },
-  {
-    title: "Beat the Heat Drive",
-    image: "/main gallery/c.webp",
-    description:
-      "Bringing cool relief to warm days — serving hydration with heart.",
-  },
-  {
-    title: "Golden Bonds ",
-    image: "/main gallery/d.webp",
-    description: "Sharing smiles and stories with the golden generation.",
-  },
-  {
-    title: "Threads of Kindness",
-    image: "/main gallery/e.webp",
-    description:
-      "From our hearts to their hands — a gesture of warmth and dignity",
-  },
-  {
-    title: "Health in Hand",
-    image: "/main gallery/f.webp",
-    description:
-      "Distributing essential medical kits — a step towards safer, healthier lives.",
-  },
-  {
-    title: "Nourish with Love",
-    image: "/main gallery/g.webp",
-    description: "Serving not just food, but kindness and connection.",
-  },
-  {
-    title: "Steps of Joy",
-    image: "/main gallery/h.webp",
-    description:
-      "Dancing beyond limits, spreading joy and confidence with every move.",
-  },
-  {
-    title: "Golden Moments",
-    image: "/main gallery/i.webp",
-    description:
-      "Spreading joy and warmth while celebrating with the wise hearts of our community.",
-  },
-  {
-    title: "Little lights",
-    image: "/main gallery/j.webp",
-    description:
-      "Sharing laughter, stories, and unforgettable moments with the bright stars of tomorrow.",
-  },
-  {
-    title: "Meals that matter",
-    image: "/main gallery/k.webp",
-    description:
-      "Extending a helping hand with every meal to those who need it most.",
-  },
-  {
-    title: "Milestone Moment",
-    image: "/main gallery/l.webp",
-    description:
-      "Celebrating our official registration — a new chapter of purpose and impact begins.",
-  },
-  {
-    title: "Meals of Kindness",
-    image: "/main gallery/m.webp",
-    description:
-      "Joining hands to serve nourishing meals with love at the NGO.",
-  },
-  {
-    title: "Young Connections",
-    image: "/main gallery/n.webp",
-    description:
-      "Spreading smiles and inspiration while engaging with bright young minds at the government school.",
-  },
-  {
-    title: "Medikit Drive",
-    image: "/main gallery/o.webp",
-    description:
-      "Providing essential health kits to support safer and healthier communities.",
-  },
-  {
-    title: "Cool Relief",
-    image: "/main gallery/p.webp",
-    description:
-      "A small gesture to help beat the heat — refreshing drinks for those in need.",
-  },
-  {
-    title: "Hygiene for her",
-    image: "/main gallery/q.webp",
-    description:
-      "Empowering women with access to menstrual hygiene and dignity.",
-  },
-  {
-    title: "Joyful Bonds",
-    image: "/main gallery/r.webp",
-    description:
-      "Creating joyful memories through laughter, love, and learning with the kids at the NGO.",
-  },
-  {
-    title: "Little Smiles",
-    image: "/main gallery/s.webp",
-    description: "A day full of fun, friendship, and heartfelt connection.",
-  },
-  {
-    title: "Equip to Learn",
-    image: "/main gallery/t.webp",
-    description:
-      "Equipping young minds with the tools to learn, dream, and grow",
-  },
-  {
-    title: "Wellness for Women",
-    image: "/main gallery/u.webp",
-    description:
-      "Spreading awareness and distributing sanitary pads to support women's hygiene and dignity in the village",
-  },
-  {
-    title: "Lunch with Love",
-    image: "/main gallery/v.webp",
-    description:
-      "Spending heartfelt moments over lunch, laughter, and stories with the elderly.",
-  },
-  {
-    title: "Care & Connection",
-    image: "/main gallery/w.webp",
-    description: "Lighting up young hearts with time, care, and kindness.",
-  },
-  {
-    title: "Heartfelt Hours",
-    image: "/main gallery/x.webp",
-    description: " Time, laughter, and love — all shared in one special visit.",
-  },
-  {
-    title: "Timeless Fun",
-    image: "/main gallery/y.webp",
-    description:
-      "From carrom to conversations, every moment was filled with laughter and light.",
-  },
-  {
-    title: "Roots of Change",
-    image: "/main gallery/z.webp",
-    description:
-      "Sharing thoughts, solutions, and support with inspiring women in the village.",
-  },
-  {
-    title: "Wellness Outreach",
-    image: "/main gallery/a1.webp",
-    description:
-      "Bringing basic healthcare closer to the slum communities through medical kits.",
-  },
-  {
-    title: "Jaipur's First Step",
-    image: "/main gallery/a2.webp",
-    description:
-      "Launched our first Jaipur event by connecting with the brightest hearts — the kids.",
-  },
+  { title: "Care Meal", image: "/main gallery/a.webp", description: "Serving smiles and lunch at Nayasawera NGO, Jaipur." },
+  { title: "Refreshment Drive", image: "/main gallery/b.webp", description: "Serving smiles and energy through every sip and snack." },
+  { title: "Beat the Heat Drive", image: "/main gallery/c.webp", description: "Bringing cool relief to warm days — serving hydration with heart." },
+  { title: "Golden Bonds", image: "/main gallery/d.webp", description: "Sharing smiles and stories with the golden generation." },
+  { title: "Threads of Kindness", image: "/main gallery/e.webp", description: "From our hearts to their hands — a gesture of warmth and dignity." },
+  { title: "Health in Hand", image: "/main gallery/f.webp", description: "Distributing essential medical kits — a step towards safer, healthier lives." },
+  { title: "Nourish with Love", image: "/main gallery/g.webp", description: "Serving not just food, but kindness and connection." },
+  { title: "Steps of Joy", image: "/main gallery/h.webp", description: "Dancing beyond limits, spreading joy and confidence with every move." },
+  { title: "Golden Moments", image: "/main gallery/i.webp", description: "Spreading joy and warmth while celebrating with the wise hearts of our community." },
+  { title: "Little lights", image: "/main gallery/j.webp", description: "Sharing laughter, stories, and unforgettable moments with the bright stars of tomorrow." },
+  { title: "Meals that matter", image: "/main gallery/k.webp", description: "Extending a helping hand with every meal to those who need it most." },
+  { title: "Milestone Moment", image: "/main gallery/l.webp", description: "Celebrating our official registration — a new chapter of purpose and impact begins." },
+  { title: "Meals of Kindness", image: "/main gallery/m.webp", description: "Joining hands to serve nourishing meals with love at the NGO." },
+  { title: "Young Connections", image: "/main gallery/n.webp", description: "Spreading smiles and inspiration while engaging with bright young minds at the government school." },
+  { title: "Medikit Drive", image: "/main gallery/o.webp", description: "Providing essential health kits to support safer and healthier communities." },
+  { title: "Cool Relief", image: "/main gallery/p.webp", description: "A small gesture to help beat the heat — refreshing drinks for those in need." },
+  { title: "Hygiene for her", image: "/main gallery/q.webp", description: "Empowering women with access to menstrual hygiene and dignity." },
+  { title: "Joyful Bonds", image: "/main gallery/r.webp", description: "Creating joyful memories through laughter, love, and learning with the kids at the NGO." },
+  { title: "Little Smiles", image: "/main gallery/s.webp", description: "A day full of fun, friendship, and heartfelt connection." },
+  { title: "Equip to Learn", image: "/main gallery/t.webp", description: "Equipping young minds with the tools to learn, dream, and grow." },
+  { title: "Wellness for Women", image: "/main gallery/u.webp", description: "Spreading awareness and distributing sanitary pads to support women's hygiene and dignity in the village." },
+  { title: "Lunch with Love", image: "/main gallery/v.webp", description: "Spending heartfelt moments over lunch, laughter, and stories with the elderly." },
+  { title: "Care & Connection", image: "/main gallery/w.webp", description: "Lighting up young hearts with time, care, and kindness." },
+  { title: "Heartfelt Hours", image: "/main gallery/x.webp", description: "Time, laughter, and love — all shared in one special visit." },
+  { title: "Timeless Fun", image: "/main gallery/y.webp", description: "From carrom to conversations, every moment was filled with laughter and light." },
+  { title: "Roots of Change", image: "/main gallery/z.webp", description: "Sharing thoughts, solutions, and support with inspiring women in the village." },
+  { title: "Wellness Outreach", image: "/main gallery/a1.webp", description: "Bringing basic healthcare closer to the slum communities through medical kits." },
+  { title: "Jaipur's First Step", image: "/main gallery/a2.webp", description: "Launched our first Jaipur event by connecting with the brightest hearts — the kids." },
 ];
 
 function AnimatedWord({ word }) {
   return (
     <span className="animated-word">
-      {word.split("").map((char, i) => (
+      {word.split("").map((char, index) => (
         <span
-          key={i}
+          key={index}
           className="animated-letter"
-          style={{ animationDelay: `${i * 0.08}s` }}
+          style={{ animationDelay: `${index * 0.08}s` }}
         >
           {char === " " ? "\u00A0" : char}
         </span>
@@ -201,538 +55,455 @@ function AnimatedWord({ word }) {
 }
 
 export default function GameCarousel() {
-  const swiperRef = useRef(null);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [selectedGameIndex, setSelectedGameIndex] = useState(null);
 
-  // Only load Swiper modules when the carousel is visible (client-side)
-  const [swiperReady, setSwiperReady] = useState(false);
-
-  useEffect(() => {
-    setSwiperReady(true);
+  const closeViewer = useCallback(() => {
+    setSelectedGameIndex(null);
   }, []);
 
-  const handleSlideChange = (s) => setActiveIndex(s.realIndex);
-
-  // Keyboard navigation for left/right arrow keys
-  const handleKeyDown = useCallback((e) => {
-    if (!swiperRef.current || !swiperRef.current.swiper) return;
-    if (e.key === "ArrowLeft") {
-      swiperRef.current.swiper.slidePrev();
-      e.preventDefault();
-    } else if (e.key === "ArrowRight") {
-      swiperRef.current.swiper.slideNext();
-      e.preventDefault();
-    }
-  }, []);
-
-  // Attach keydown listener when carousel is mounted
   useEffect(() => {
-    if (!swiperReady) return;
-    // Attach to the document for global navigation, or to the carousel for scoped navigation
+    if (selectedGameIndex === null) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") closeViewer();
+    };
+
     document.addEventListener("keydown", handleKeyDown);
+
     return () => {
+      document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [swiperReady, handleKeyDown]);
+  }, [selectedGameIndex, closeViewer]);
 
   return (
-    <section
-      className="game-section centered-section"
-      style={{ position: "relative", overflow: "hidden", background: "black" }}
-    >
+    <section className="game-section centered-section">
       <div className="background-lines-wrapper">
         <Suspense fallback={null}>
           <BackgroundLines />
         </Suspense>
       </div>
-      <h2
-        className="line-title animated-title pink-text"
-        style={{
-          position: "relative",
-          marginLeft: "auto",
-          marginRight: "auto",
-          left: "0",
-          right: "0",
-          top: 0,
-          transform: "none",
-          fontSize: "2rem",
-          zIndex: 20,
-          background: "rgba(0,0,0,0.7)",
-          backdropFilter: "blur(2px)",
-          textAlign: "center",
-          transition:
-            "transform 0.3s cubic-bezier(.4,2,.6,1), left 0.3s cubic-bezier(.4,2,.6,1)",
-          display: "block",
-          width: "fit-content",
-        }}
-      >
+
+      <h2 className="line-title animated-title">
         <AnimatedWord word="GALLERY" />
       </h2>
+
       <div className="custom-carousel">
-        {swiperReady && (
-          <SwiperCore
-            ref={swiperRef}
-            effect="coverflow"
-            grabCursor
-            centeredSlides
-            slidesPerView="auto"
-            loop
-            coverflowEffect={{
-              rotate: 0,
-              stretch: 0,
-              depth: 200,
-              modifier: 1,
-              slideShadows: false,
-              scale: 0.85,
-            }}
-            spaceBetween={30}
-            modules={[EffectCoverflow, Keyboard]}
-            className="game-swiper"
-            onSlideChange={handleSlideChange}
-            keyboard={{ enabled: true, onlyInViewport: false }}
-            initialSlide={0}
-          >
-            {games.map((g, i) => (
-              <SwiperSlide key={i} style={{ width: "320px", height: "400px" }}>
-                <div
-                  className={`item${activeIndex === i ? " active" : ""}`}
-                  tabIndex={0}
-                  aria-selected={activeIndex === i}
+        <div className="gallery-marquee">
+          <div className="gallery-track">
+            {[...games, ...games].map((game, index) => {
+              const originalIndex = index % games.length;
+
+              return (
+                <button
+                  type="button"
+                  key={`${game.image}-${index}`}
+                  className="marquee-card"
+                  onClick={() => setSelectedGameIndex(originalIndex)}
+                  aria-label={`Open photo: ${game.title}`}
                 >
-                  <div className="item-image-wrapper">
-                    <img
-                      src={g.image}
-                      alt={g.title}
-                      className="item-image"
-                      draggable={false}
-                      loading="lazy"
-                    />
+                  <img
+                    src={game.image}
+                    alt={game.title}
+                    draggable={false}
+                    loading={index < games.length ? "eager" : "lazy"}
+                  />
+                  <div className="marquee-card-caption">
+                    <h3>{game.title}</h3>
+                    <p>{game.description}</p>
+                    <span className="open-photo-hint">Click to enlarge</span>
                   </div>
-                  <div className="item-float-bg" />
-                  <div className="item-desc pink-text">
-                    <h3 className="item-title-animated pink-text">{g.title}</h3>
-                    <p className="game-desc-white">{g.description}</p>
-                  </div>
-                  <div className="item-glow" />
-                </div>
-              </SwiperSlide>
-            ))}
-          </SwiperCore>
-        )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
+
+      {selectedGameIndex !== null && (
+        <div
+          className="gallery-lightbox"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Gallery photo viewer"
+          onClick={closeViewer}
+        >
+          <button
+            type="button"
+            className="lightbox-close"
+            onClick={closeViewer}
+            aria-label="Close photo viewer"
+          >
+            &times;
+          </button>
+
+          <div
+            className="lightbox-content"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <img
+              className="lightbox-image"
+              src={games[selectedGameIndex].image}
+              alt={games[selectedGameIndex].title}
+            />
+            <h2 className="lightbox-title">
+              {games[selectedGameIndex].title}
+            </h2>
+            <p className="lightbox-description">
+              {games[selectedGameIndex].description}
+            </p>
+            <div className="lightbox-counter">
+              {selectedGameIndex + 1} / {games.length}
+            </div>
+          </div>
+        </div>
+      )}
+
       <style jsx>{`
-        * {
-          margin: 0;
-          padding: 0;
-        }
-        body {
-          font-family: "Roboto", sans-serif;
-        }
-        .background-lines-wrapper {
-          position: absolute;
-          inset: 0;
-          width: 100vw;
-          height: 100vh;
-          z-index: 0;
-          pointer-events: none;
-          overflow: hidden;
-        }
-        .centered-section {
+        .game-section {
+          position: relative;
           min-height: 100vh;
+          overflow: hidden;
           display: flex;
           flex-direction: column;
           justify-content: center;
           align-items: center;
-          padding: 0 50px;
-          position: relative;
-          top: -15px;
-          background: #000 !important;
+          padding: 36px 0;
+          background: #000;
+          color: white;
         }
-        .game-section {
-          padding: 0;
-          background: #000 !important;
+
+        .background-lines-wrapper {
+          position: absolute;
+          inset: 0;
+          z-index: 0;
+          pointer-events: none;
+          overflow: hidden;
         }
+
         .line-title {
-          width: 400px;
           position: relative;
-          margin-bottom: 48px;
-          padding-bottom: 16px;
-          font-size: 20px;
+          z-index: 2;
+          margin: 0 auto 36px;
+          padding: 12px 20px;
+          text-align: center;
+          font-size: clamp(2.4rem, 5vw, 4.5rem);
           font-weight: 700;
-          text-transform: capitalize;
+          text-transform: uppercase;
+          background: rgba(0, 0, 0, 0.7);
+          color: #ff69b4;
         }
-        .animated-title {
-          animation: fadeInDown 1s cubic-bezier(0.4, 2, 0.6, 1);
-        }
-        @keyframes fadeInDown {
-          0% {
-            opacity: 0;
-            transform: translateY(-40px) scale(0.95);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-        .animated-word {
-          display: inline-block;
-        }
+
+        .animated-word,
         .animated-letter {
           display: inline-block;
+        }
+
+        .animated-letter {
           opacity: 0;
-          transform: translateY(24px) scale(0.98);
-          animation: headingLetterFadeIn 0.5s cubic-bezier(0.4, 2, 0.6, 1)
-            forwards;
+          animation: letterIn 0.5s ease forwards;
         }
-        @keyframes headingLetterFadeIn {
-          0% {
-            opacity: 0;
-            transform: translateY(24px) scale(0.98);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
+
         .custom-carousel {
+          position: relative;
+          z-index: 1;
           width: 100%;
+          overflow: hidden;
         }
-        .item {
-          margin: 0 0px 60px;
+
+        .gallery-marquee {
+          width: 100%;
+          overflow: hidden;
+          padding: 28px 0 40px;
+          -webkit-mask-image: linear-gradient(
+            to right,
+            transparent,
+            black 4%,
+            black 96%,
+            transparent
+          );
+          mask-image: linear-gradient(
+            to right,
+            transparent,
+            black 4%,
+            black 96%,
+            transparent
+          );
+        }
+
+        .gallery-track {
+          display: flex;
+          align-items: center;
+          gap: 28px;
+          width: max-content;
+          animation: gallery-flow 110s linear infinite;
+          will-change: transform;
+        }
+
+        .gallery-marquee:hover .gallery-track {
+          animation-play-state: paused;
+        }
+
+        .marquee-card {
+          position: relative;
+          display: block;
+          flex: 0 0 320px;
           width: 320px;
           height: 400px;
-          display: flex;
-          align-items: flex-end;
-          background: #343434;
-          border-radius: 16px;
+          padding: 0;
           overflow: hidden;
-          position: relative;
-          transition: all 0.4s cubic-bezier(0.4, 2, 0.6, 1);
-          cursor: pointer;
-          left: 50%;
-          transform: translateX(-50%);
-        }
-        .item-image-wrapper {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          z-index: 0;
-          display: flex;
-          align-items: stretch;
-          justify-content: stretch;
-        }
-        .item-image {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-          object-position: center;
-          pointer-events: none;
-          user-select: none;
-          display: block;
+          border: 1px solid rgba(255, 105, 180, 0.22);
+          border-radius: 16px;
           background: #222;
+          text-align: left;
+          cursor: pointer;
+          transition:
+            transform 0.3s ease,
+            box-shadow 0.3s ease;
         }
-        .custom-carousel .swiper-slide {
-          display: flex;
-          justify-content: center;
+
+        .marquee-card:hover {
+          transform: translateY(-7px) scale(1.025);
+          box-shadow: 0 0 28px rgba(255, 105, 180, 0.3);
         }
-        .item.active {
-          width: 500px !important;
-          left: 50%;
-          transform: translateX(-50%);
-          box-shadow: 12px 40px 40px rgba(0, 0, 0, 0.25);
+
+        .marquee-card > img {
+          display: block;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center;
+          transition: transform 0.4s ease;
         }
-        .item:after {
+
+        .marquee-card:hover > img {
+          transform: scale(1.04);
+        }
+
+        .marquee-card::after {
           content: "";
           position: absolute;
-          height: 100%;
-          width: 100%;
-          left: 0;
-          top: 0;
-          background-image: linear-gradient(
-              to bottom,
-              rgba(0, 0, 0, 0) 60%,
-              rgba(0, 0, 0, 0.7) 100%
-            ),
-            linear-gradient(
-              to right,
-              rgba(0, 0, 0, 0.18) 0%,
-              rgba(0, 0, 0, 0) 20%,
-              rgba(0, 0, 0, 0) 80%,
-              rgba(0, 0, 0, 0.18) 100%
-            );
-          z-index: 1;
+          inset: 0;
           pointer-events: none;
+          background: linear-gradient(
+            to bottom,
+            rgba(0, 0, 0, 0.02) 28%,
+            rgba(0, 0, 0, 0.88) 100%
+          );
         }
-        .item-float-bg {
+
+        .marquee-card-caption {
           position: absolute;
-          top: 0;
-          left: 0;
+          z-index: 1;
           right: 0;
           bottom: 0;
-          z-index: 1;
-          pointer-events: none;
-          background: none;
-          border-radius: 16px;
-          animation: floatBg 4s ease-in-out infinite alternate;
-          opacity: 0.15;
-          filter: blur(8px) brightness(1.2);
+          left: 0;
+          padding: 24px 20px;
+          color: white;
         }
-        @keyframes floatBg {
-          0% {
-            transform: scale(1) translateY(0);
-          }
-          100% {
-            transform: scale(1.04) translateY(-10px);
-          }
+
+        .marquee-card-caption h3 {
+          margin: 0 0 8px;
+          color: #ff69b4;
+          font-size: 21px;
+          font-weight: 700;
         }
-        .item-glow {
-          display: none;
+
+        .marquee-card-caption p {
+          margin: 0;
+          color: white;
+          font-size: 14px;
+          line-height: 1.5;
         }
-        .item.active .item-glow {
-          display: block;
-          position: absolute;
-          top: -4px;
-          left: -4px;
-          right: -4px;
-          bottom: -4px;
-          border-radius: 20px;
-          pointer-events: none;
-          z-index: 2;
-          box-shadow: 0 0 32px 8px #e73700, 0 0 0 0 #fff;
-          animation: glowPulse 1.2s infinite alternate;
-        }
-        @keyframes glowPulse {
-          0% {
-            box-shadow: 0 0 32px 8px #e73700, 0 0 0 0 #fff;
-            opacity: 0.7;
-          }
-          100% {
-            box-shadow: 0 0 48px 16px #e73700, 0 0 8px 2px #fff;
-            opacity: 1;
-          }
-        }
-        .item-title-animated {
-          animation: fadeInUp 0.7s cubic-bezier(0.4, 2, 0.6, 1);
-        }
-        @keyframes fadeInUp {
-          0% {
-            opacity: 0;
-            transform: translateY(24px) scale(0.98);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-        .item-desc {
-          padding: 0 24px 12px;
-          color: #fff;
-          position: relative;
-          z-index: 2;
-          transform: translateY(calc(100% - 54px));
-          transition: all 0.4s cubic-bezier(0.4, 2, 0.6, 1);
-        }
-        .item.active .item-desc {
-          transform: none;
-        }
-        .item-desc p {
+
+        .open-photo-hint {
+          display: inline-block;
+          margin-top: 10px;
+          color: #ffc2e1;
+          font-size: 12px;
           opacity: 0;
-          transform: translateY(32px);
-          transition: all 0.4s cubic-bezier(0.4, 2, 0.6, 1) 0.2s;
+          transition: opacity 0.2s ease;
         }
-        .item.active .item-desc p {
+
+        .marquee-card:hover .open-photo-hint,
+        .marquee-card:focus-visible .open-photo-hint {
           opacity: 1;
-          transform: translateY(0);
-          animation: fadeInText 0.6s 0.2s both;
         }
-        @keyframes fadeInText {
-          0% {
-            opacity: 0;
-            transform: translateY(32px);
+
+        .gallery-lightbox {
+          position: fixed;
+          inset: 0;
+          z-index: 99999;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 70px 24px 24px;
+          background: rgba(0, 0, 0, 0.96);
+          backdrop-filter: blur(8px);
+          animation: lightboxIn 0.2s ease both;
+        }
+
+        .lightbox-content {
+          width: min(900px, 90vw);
+          max-height: 85vh;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          text-align: center;
+        }
+
+        .lightbox-image {
+          display: block;
+          max-width: 100%;
+          max-height: 65vh;
+          width: auto;
+          height: auto;
+          object-fit: contain;
+          border-radius: 10px;
+          box-shadow: 0 0 32px rgba(255, 105, 180, 0.15);
+        }
+
+        .lightbox-title {
+          margin: 0;
+          color: #ff69b4;
+          font-size: clamp(20px, 3vw, 30px);
+          font-weight: 700;
+        }
+
+        .lightbox-description {
+          margin: 0;
+          max-width: 650px;
+          color: #fff;
+          font-size: 15px;
+          line-height: 1.6;
+        }
+
+        .lightbox-counter {
+          color: #ccc;
+          font-size: 14px;
+        }
+
+        .lightbox-close {
+          position: absolute;
+          top: 18px;
+          right: 24px;
+          z-index: 2;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 46px;
+          height: 46px;
+          border: 1px solid #555;
+          border-radius: 50%;
+          background: #222;
+          color: white;
+          font-size: 32px;
+          line-height: 1;
+          cursor: pointer;
+        }
+
+        .lightbox-close:hover {
+          background: #333;
+        }
+
+        @keyframes gallery-flow {
+          from {
+            transform: translateX(0);
           }
-          100% {
+          to {
+            transform: translateX(-50%);
+          }
+        }
+
+        @keyframes letterIn {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
             opacity: 1;
             transform: translateY(0);
           }
         }
-        .game-desc-white {
-          color: #fff !important;
+
+        @keyframes lightboxIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
         }
-        .swiper-coverflow .swiper-slide {
-          transform-origin: 50% 50% !important;
-          transform: scale(0.85) !important;
-        }
-        .swiper-coverflow .swiper-slide-active {
-          transform: scale(1) !important;
-        }
+
         @media (max-width: 767px) {
-          .background-lines-wrapper {
-            width: 100vw;
-            height: 100vh;
+          .game-section {
+            padding: 28px 0;
           }
-          .centered-section {
-            padding: 0 2vw;
-            min-height: 100vh;
-            background: #000 !important;
-          }
+
           .line-title {
-            width: 290px;
-            margin-bottom: 28px;
-            font-size: 22px;
+            margin-bottom: 22px;
+            font-size: 30px;
           }
-          .custom-carousel .swiper-slide {
-            justify-content: center;
+
+          .gallery-track {
+            gap: 16px;
+            animation-duration: 85s;
           }
-          .item,
-          .game-swiper .swiper-slide {
-            width: 240px !important;
-            height: 340px;
-            margin: 0 0px 48px;
+
+          .marquee-card {
+            flex-basis: 245px;
+            width: 245px;
+            height: 330px;
           }
-          .item {
-            left: 50%;
-            transform: translateX(-50%);
-            position: relative;
+
+          .marquee-card-caption {
+            padding: 18px 14px;
           }
-          .item.active {
-            width: 320px !important;
-            left: 50%;
-            transform: translateX(-50%);
+
+          .marquee-card-caption h3 {
+            font-size: 18px;
           }
-          .item-desc {
-            padding: 0 18px 10px;
-            transform: translateY(calc(100% - 54px));
+
+          .marquee-card-caption p {
+            font-size: 12px;
           }
-          .game-swiper {
-            padding-bottom: 10px !important;
+
+          .lightbox-content {
+            width: 94vw;
           }
-          .swiper-pagination {
-            display: none !important;
+
+          .lightbox-image {
+            max-height: 55vh;
           }
-          .swiper-coverflow .swiper-slide {
-            transform: scale(0.85) !important;
+
+          .lightbox-close {
+            top: 12px;
+            right: 12px;
           }
-          .swiper-coverflow .swiper-slide-active {
-            transform: scale(1) !important;
-          }
-          .item-float-bg {
-            filter: blur(6px) brightness(1.1);
-          }
-          .item-image-wrapper {
-            width: 100% !important;
-            height: 100% !important;
-            min-width: 0 !important;
-            min-height: 0 !important;
-            max-width: 100% !important;
-            max-height: 100% !important;
-            display: flex !important;
-            align-items: stretch !important;
-            justify-content: stretch !important;
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-          }
-          .item-image {
-            width: 100% !important;
-            height: 100% !important;
-            min-width: 0 !important;
-            min-height: 0 !important;
-            max-width: 100% !important;
-            max-height: 100% !important;
-            display: block !important;
-            object-fit: contain !important;
-            object-position: center !important;
-            background: #222 !important;
+
+          .lightbox-description {
+            font-size: 13px;
           }
         }
-        @media (min-width: 768px) {
-          .background-lines-wrapper {
-            width: 100vw;
-            height: 100vh;
+
+        @media (prefers-reduced-motion: reduce) {
+          .gallery-track {
+            animation: none;
           }
-          .game-swiper {
-            padding-bottom: 20px !important;
+
+          .animated-letter,
+          .gallery-lightbox {
+            animation: none;
           }
-          .swiper-pagination {
-            display: none !important;
+
+          .animated-letter {
+            opacity: 1;
           }
-          .centered-section {
-            background: #000 !important;
-          }
-        }
-        .pink-text,
-        .pink-text * {
-          color: #ff69b4 !important;
-        }
-        .game-desc-white {
-          color: #fff !important;
-        }
-      `}</style>
-      <style jsx global>{`
-        .swiper {
-          position: relative;
-          overflow: hidden;
-          z-index: 1;
-        }
-        .swiper-wrapper {
-          position: relative;
-          width: 100%;
-          height: 100%;
-          z-index: 1;
-          display: flex;
-          transition-property: transform;
-          box-sizing: content-box;
-        }
-        .swiper-slide {
-          flex-shrink: 0;
-          width: 320px;
-          height: 400px;
-          position: relative;
-          transition-property: transform;
-          display: block;
-        }
-        .swiper-slide-active {
-          z-index: 2;
-        }
-        .swiper-slide-next,
-        .swiper-slide-prev {
-          z-index: 1;
-        }
-        .swiper-pagination,
-        .swiper-pagination-bullet,
-        .swiper-pagination-bullet-active {
-          display: none !important;
-        }
-        .swiper-coverflow .swiper-wrapper {
-          perspective: 1200px;
-        }
-        .swiper-coverflow .swiper-slide {
-          transition: transform 0.4s cubic-bezier(0.4, 2, 0.6, 1),
-            box-shadow 0.4s cubic-bezier(0.4, 2, 0.6, 1);
-          transform: scale(0.85) !important;
-        }
-        .swiper-coverflow .swiper-slide-active {
-          transform: scale(1) !important;
-        }
-        @media (max-width: 767px) {
-          .swiper-slide {
-            width: 240px !important;
-            height: 340px !important;
-          }
-          .game-swiper {
-            padding-bottom: 10px !important;
-          }
-          body {
-            background: #000 !important;
-          }
-        }
-        body {
-          background: #000 !important;
-        }
-        html {
-          background: #000 !important;
         }
       `}</style>
     </section>

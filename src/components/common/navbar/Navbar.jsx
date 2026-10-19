@@ -96,11 +96,18 @@ const Navbar = () => {
           <div className="absolute right-30 hidden items-center gap-6 font-medium md:flex">
             {navLinks.middle.map((link) => (
               <div key={link.id} className="relative group">
-                <TransitionLink href={link.url}>
-                  <p className="relative text-black after:block after:content-[''] after:absolute after:h-[2px] after:bg-pink-400 after:w-full after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:origin-left text-medium">
+                {link.label === "Contact Us" ? (
+                  <TransitionLink
+                    href="/contactus"
+                    className="relative cursor-pointer text-black after:block after:content-[''] after:absolute after:h-[2px] after:bg-pink-400 after:w-full after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:origin-left text-medium"
+                  >
+                    Contact Us
+                  </TransitionLink>
+                ) : (
+                  <p className="relative cursor-default text-black after:block after:content-[''] after:absolute after:h-[2px] after:bg-pink-400 after:w-full after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:origin-left text-medium">
                     {link.label}
                   </p>
-                </TransitionLink>
+                )}
                 {link.dialog && (
                   <div className="z-50 absolute top-full left-0 hidden flex-col mt-1 w-40 bg-white rounded-lg shadow-md border group-hover:flex">
                     {link.dialog.map((el) => (
@@ -170,11 +177,9 @@ const Navbar = () => {
                   transitionDelay: isMenuOpen ? `${idx * 80 + 100}ms` : "0ms",
                 }}
               >
-                <MobileTransitionLink href={link.url}>
-                  <p className="text-black font-medium transition-colors duration-300 hover:text-pink-600">
-                    {link.label}
-                  </p>
-                </MobileTransitionLink>
+                <p className="text-black font-medium cursor-default">
+                  {link.label}
+                </p>
                 {link.dialog && (
                   <div className="pl-4 mt-1 space-y-1">
                     {link.dialog.map((el, subIdx) => (
