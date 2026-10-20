@@ -9,6 +9,7 @@ const navLinks = {
         { id: 2, title: "Gallery", path: "/ourwork/gallery" },
         { id: 3, title: "Past Events", path: "/ourwork/events" },
         { id: 4, title: "Upcoming Events", path: "/ourwork/upcomingevents" },
+        { id: 5, title: "Blogs", path: "/ourwork/blogs" },
       ],
     },
     {
@@ -18,7 +19,6 @@ const navLinks = {
       dialog: [
         { id: 1, title: "Volunteering", path: "/joinus/volunteering" },
         { id: 2, title: "Internship", path: "/joinus/internship" },
-        { id: 3, title: "Blogs", path: "/joinus/blogs" },
       ],
     },
     {
